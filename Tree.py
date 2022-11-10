@@ -12,6 +12,8 @@ class Node:
         self.value = None
         self.left_child = None
         self.right_child = None
+        self.alpha = float('-inf')
+        self.beta = float('inf')
 
         if parent != None:
             x = self.parent.position[0]
