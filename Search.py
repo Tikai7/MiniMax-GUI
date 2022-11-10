@@ -5,9 +5,11 @@ import time
 
 pygame.font.init()
 
+GRAY_COLOR = (125, 142, 161)
 SUCCESS_COLOR = (0, 170, 255)
+SUCCESS_COLOR_B = (255, 71, 84)
 EXPLORED_COLOR = (255, 119, 0)
-SPEED = 0.17
+SPEED = 0.1
 RAYON = 25
 MAX = 1
 
@@ -53,16 +55,21 @@ class SearchAlgorithm:
         pygame.display.flip()
 
     @staticmethod
-    def DisplayAlphaBeta(surface, alpha, beta, noeud: Tree.Node):
+    def DisplayAlphaBeta(surface, noeud: Tree.Node):
+        CURRENT_COLOR = SUCCESS_COLOR if noeud.alpha != float(
+            '-inf') else GRAY_COLOR
+        CURRENT_COLOR_B = SUCCESS_COLOR_B if noeud.beta != float(
+            'inf') else GRAY_COLOR
+
         x, y = noeud.position
-        text = f"A : {alpha}"
+        text = f"A : {noeud.alpha}"
         text_font = pygame.font.SysFont("Comic Sans MS", 15)
-        text_render = text_font.render(text, False, (255, 255, 255))
+        text_render = text_font.render(text, False, CURRENT_COLOR)
         surface.blit(text_render, (x-20, y-RAYON-40))
 
-        text = f"B : {beta}"
+        text = f"B : {noeud.beta}"
         text_font = pygame.font.SysFont("Comic Sans MS", 15)
-        text_render = text_font.render(text, False, (255, 255, 255))
+        text_render = text_font.render(text, False, CURRENT_COLOR_B)
         surface.blit(text_render, (x-20, y-RAYON-25))
 
         time.sleep(SPEED)
@@ -115,6 +122,7 @@ class SearchAlgorithm:
 
             SearchAlgorithm.DisplayValue(surface, noeud)
         else:
+            SearchAlgorithm.MarkNode(surface, noeud)
             best_value = float('-inf')
             best_path = None
             succ_childs = [noeud.left_child, noeud.right_child]
@@ -134,22 +142,25 @@ class SearchAlgorithm:
 
     @staticmethod
     def NegaMaxAlphaBeta(surface, noeud: Tree.Node, depth, player, alpha, beta):
+        noeud.alpha = alpha
+        noeud.beta = beta
+
         if depth == 1:
             if player != MAX:
                 noeud.value = -noeud.value
 
             SearchAlgorithm.DisplayValue(surface, noeud)
-            SearchAlgorithm.DisplayAlphaBeta(surface, alpha, beta, noeud)
+            SearchAlgorithm.DisplayAlphaBeta(surface, noeud)
 
         else:
-            noeud.alpha = alpha
-            noeud.beta = beta
+            SearchAlgorithm.MarkNode(surface, noeud)
             best_value = float('-inf')
             best_path = None
+            SearchAlgorithm.DisplayAlphaBeta(
+                surface, noeud)
             succ_childs = [noeud.left_child, noeud.right_child]
             for child in succ_childs:
                 SearchAlgorithm.MarkLine(surface, child, noeud, False)
-                SearchAlgorithm.DisplayAlphaBeta(surface, alpha, beta, child)
                 SearchAlgorithm.NegaMaxAlphaBeta(
                     surface, child, depth-1, -player, -beta, -alpha)
                 if -child.value > best_value:
@@ -158,6 +169,9 @@ class SearchAlgorithm:
 
                 if best_value > alpha:
                     alpha = best_value
+                    noeud.alpha = alpha
+                    SearchAlgorithm.DisplayAlphaBeta(
+                        surface, child)
 
                 if beta <= alpha:
                     break
@@ -167,4 +181,6 @@ class SearchAlgorithm:
             SearchAlgorithm.MarkLine(surface, best_path, noeud, True)
             SearchAlgorithm.DisplayValue(surface, noeud, False)
             SearchAlgorithm.DisplayValue(surface, best_path, True)
+            SearchAlgorithm.DisplayAlphaBeta(surface, noeud)
+
             return best_value
