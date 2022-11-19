@@ -1,5 +1,6 @@
 
 import pygame
+import pygame_menu
 import Tree
 import Search
 import time
@@ -7,12 +8,30 @@ import time
 from collections import deque
 from pygame import gfxdraw
 
+pygame.init()
 pygame.font.init()
 
+
 VALUES = deque([10, 5, 7, 11, 12, 8, 9, 8, 5, 12, 11, 12, 9, 8, 7, 10])
+# VALUES = deque([5, 2, 1, 4, 10, 12, 5, 13, -3, 22, 9, 12, 11, 10, 21, 20])
+
 COLOR = (255, 255, 255)
 THICKNESS = 1
 RAYON = 25
+
+
+Launch = True
+Algo = 1
+
+
+def launch_game():
+    menu.clear()
+    menu.disable()
+
+
+def set_algo(value, algo):
+    global Algo
+    Algo = algo
 
 
 def render_tree(root: Tree.Node):
@@ -22,6 +41,7 @@ def render_tree(root: Tree.Node):
         if root.parent is not None:
             draw_link(surface, root.position, root.parent.position)
         render_tree(root.right_child)
+    return True
 
 
 def build_tree():
@@ -50,7 +70,6 @@ def draw_link(surface, points_son, points_parent):
         surface, x1, y1, x2, y2, COLOR)
 
 
-Launch = True
 WIDTH = 1600
 HEIGHT = 900
 CURRENT_PLAYER = "Max"
@@ -60,12 +79,33 @@ DEPTH = 5
 surface = pygame.display.set_mode((WIDTH, HEIGHT))  # pygame.RESIZABLE
 surface.fill((23, 28, 38))
 
-root = build_tree()
-render_tree(root)
 
 player = CURRENT_PLAYER
 
+menu = pygame_menu.Menu('Algorithm Simulation', WIDTH, HEIGHT,
+                        theme=pygame_menu.themes.THEME_BLUE)
+
+menu.add.selector(
+    'Algorithm :',
+    [
+        ('Mini-Max', 1),
+        ('Nega-Max', 2),
+        ('Nega-Max with Alpha Beta', 3)
+    ],
+    onchange=set_algo,
+)
+
+menu.add.button('Play', launch_game)
+menu.add.button('Quit', pygame_menu.events.EXIT)
+menu.mainloop(surface)
+
+surface.fill((23, 28, 38))
+
+root = build_tree()
+render_tree(root)
+
 while Launch:
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             Launch = False
@@ -82,13 +122,15 @@ while Launch:
 
     pygame.display.flip()
 
-    # bestValue = Search.SearchAlgorithm.MiniMax(
-    #     surface, root, DEPTH, player=PLAYER)
-    # bestValue = Search.SearchAlgorithm.NegaMax(
-    #     surface, root, DEPTH, player=PLAYER)
-
-    bestValue = Search.SearchAlgorithm.NegaMaxAlphaBeta(
-        surface, root, DEPTH, PLAYER, root.alpha, root.beta)
+    if Algo == 1:
+        bestValue = Search.SearchAlgorithm.MiniMax(
+            surface, root, DEPTH, player=PLAYER)
+    elif Algo == 2:
+        bestValue = Search.SearchAlgorithm.NegaMax(
+            surface, root, DEPTH, player=PLAYER)
+    else:
+        bestValue = Search.SearchAlgorithm.NegaMaxAlphaBeta(
+            surface, root, DEPTH, PLAYER, root.alpha, root.beta)
 
     text = f"Pour le joueur {CURRENT_PLAYER} le meilleur score est : {bestValue}"
     text_font = pygame.font.SysFont("Comic Sans MS", 20)
@@ -96,4 +138,5 @@ while Launch:
     surface.blit(text_render, (10, 10))
     pygame.display.flip()
     time.sleep(10)
+    Game = False
     Launch = False
