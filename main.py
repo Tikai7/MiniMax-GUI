@@ -22,11 +22,24 @@ RAYON = 25
 
 Launch = True
 Algo = 1
+CURRENT_PLAYER = "Max"
+player = CURRENT_PLAYER
+PLAYER = 1
 
 
 def launch_game():
     menu.clear()
     menu.disable()
+
+
+def set_player(player_value, value):
+    global CURRENT_PLAYER
+    global PLAYER
+    global player
+
+    CURRENT_PLAYER = player_value[0][0]
+    PLAYER = player_value[0][1]
+    player = CURRENT_PLAYER
 
 
 def set_algo(value, algo):
@@ -72,15 +85,11 @@ def draw_link(surface, points_son, points_parent):
 
 WIDTH = 1600
 HEIGHT = 900
-CURRENT_PLAYER = "Max"
-PLAYER = 1
 DEPTH = 5
 
 surface = pygame.display.set_mode((WIDTH, HEIGHT))  # pygame.RESIZABLE
 surface.fill((23, 28, 38))
 
-
-player = CURRENT_PLAYER
 
 menu = pygame_menu.Menu('Algorithm Simulation', WIDTH, HEIGHT,
                         theme=pygame_menu.themes.THEME_BLUE)
@@ -93,6 +102,15 @@ menu.add.selector(
         ('Nega-Max with Alpha Beta', 3)
     ],
     onchange=set_algo,
+)
+
+menu.add.selector(
+    'Player :',
+    [
+        ('Max', 1),
+        ('Min', -1)
+    ],
+    onchange=set_player,
 )
 
 menu.add.button('Play', launch_game)
