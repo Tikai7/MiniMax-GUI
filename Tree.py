@@ -2,7 +2,7 @@ from collections import deque
 
 MAX_DEPTH = 4
 WIDTH = 1600
-HEIGHT = 900
+HEIGHT = 700
 
 
 class Node:

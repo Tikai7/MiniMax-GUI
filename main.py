@@ -84,45 +84,49 @@ def draw_link(surface, points_son, points_parent):
 
 
 WIDTH = 1600
-HEIGHT = 900
+HEIGHT = 700
 DEPTH = 5
 
 surface = pygame.display.set_mode((WIDTH, HEIGHT))  # pygame.RESIZABLE
 surface.fill((23, 28, 38))
 
-
-menu = pygame_menu.Menu('Algorithm Simulation', WIDTH, HEIGHT,
-                        theme=pygame_menu.themes.THEME_BLUE)
-
-menu.add.selector(
-    'Algorithm :',
-    [
-        ('Mini-Max', 1),
-        ('Nega-Max', 2),
-        ('Nega-Max with Alpha Beta', 3)
-    ],
-    onchange=set_algo,
-)
-
-menu.add.selector(
-    'Player :',
-    [
-        ('Max', 1),
-        ('Min', -1)
-    ],
-    onchange=set_player,
-)
-
-menu.add.button('Play', launch_game)
-menu.add.button('Quit', pygame_menu.events.EXIT)
-menu.mainloop(surface)
-
-surface.fill((23, 28, 38))
-
-root = build_tree()
-render_tree(root)
-
 while Launch:
+
+    # ----------------- MENU
+
+    menu = pygame_menu.Menu('Algorithm Simulation', WIDTH, HEIGHT,
+                            theme=pygame_menu.themes.THEME_BLUE)
+
+    menu.add.selector(
+        'Algorithm :',
+        [
+            ('Mini-Max', 1),
+            ('Nega-Max', 2),
+            ('Nega-Max with Alpha Beta', 3)
+        ],
+        onchange=set_algo,
+    )
+
+    menu.add.selector(
+        'Player :',
+        [
+            ('Max', 1),
+            ('Min', -1)
+        ],
+        onchange=set_player,
+    )
+    menu.add.button('Play', launch_game)
+    menu.add.button('Quit', pygame_menu.events.EXIT)
+    menu.mainloop(surface)
+
+    surface.fill((23, 28, 38))
+
+    # ----------------- RENDU DE L'ARBRE
+
+    root = build_tree()
+    render_tree(root)
+
+    # ----------------- LANCEMENT DU JEU
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -132,7 +136,7 @@ while Launch:
         text = f"{player}"
         text_font = pygame.font.SysFont("Comic Sans MS", 20)
         text_render = text_font.render(text, False, (255, 255, 255))
-        surface.blit(text_render, (10, (i+2.5)*75))
+        surface.blit(text_render, (10, (i+2.5)*65))
         if player == "Max":
             player = "Min"
         else:
@@ -153,8 +157,20 @@ while Launch:
     text = f"Pour le joueur {CURRENT_PLAYER} le meilleur score est : {bestValue}"
     text_font = pygame.font.SysFont("Comic Sans MS", 20)
     text_render = text_font.render(text, False, (255, 255, 255))
-    surface.blit(text_render, (10, 10))
+    surface.blit(text_render, ((WIDTH//3)+60, 10))
+
+    text = f"Vous serez redirigé vers le menu dans 5 secondes"
+    text_font = pygame.font.SysFont("Comic Sans MS", 25)
+    text_render = text_font.render(text, False, (0, 170, 255))
+    surface.blit(text_render, ((WIDTH//3)-5, 40))
+
     pygame.display.flip()
-    time.sleep(10)
-    Game = False
-    Launch = False
+    time.sleep(5)
+    menu.enable()
+
+    # ----------------- REINITIALISATION DES VARIABLES
+    VALUES = deque([10, 5, 7, 11, 12, 8, 9, 8, 5, 12, 11, 12, 9, 8, 7, 10])
+    Algo = 1
+    CURRENT_PLAYER = "Max"
+    player = CURRENT_PLAYER
+    PLAYER = 1
